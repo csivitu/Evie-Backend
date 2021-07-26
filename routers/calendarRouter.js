@@ -1,15 +1,14 @@
 const express = require('express');
-const path = require('path');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const Mailgun = require('mailgun-js');
+const inlineCSS = require('inline-css');
 const router = express.Router();
 const Events = require('../models/events');
-
+const Approved = require('../models/approved');
 
 router.get("/calendar", async (req, res) => {
     try {
-        const events = await Events.find({});
-        console.log(events);
+        const events = await Approved.find({});
         res.json(events);
     } catch (e) {
         res.status(500).json({ msg: 'Error: ' + e });
@@ -19,41 +18,29 @@ router.get("/calendar", async (req, res) => {
 router.post('/add', async (req, res) => {
     console.log(req.body);
     try {
-        let transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD
-            },
-            //to enable localhost for now
-            tls: {
-                rejectUnauthorized: false
-            }
-        });
+        const mailgun = new Mailgun({ apiKey: process.env.MAILAPI , domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
+        const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
+        if(!token){
+            res.status(501).json({msg: 'Invalid Token'});
+            return;
+        }
+        async function run(mailTo) {
+            const template = `Follow this link to confirm your email <br>
+            <a href="http://localhost:3001/api/confirmation/${token}">Click here to Verify Email</a>`;
+            const html = await inlineCSS(template, { url: 'fake' });
 
-        jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' }, (err, token) => {
-            if (!err) {
-                res.json({
-                    token: token
-                });
-                let mailOptions = {
-                    from: '"CSI_VIT" <your@email.com>', // sender address
-                    to: req.body.email, // list of receivers
-                    subject: 'Email Confirmation', // Subject line
-                    html: `Follow this link to confirm your email <br>
-                    <a href="http://localhost:3001/api/confirmation/${token}">Click here to Verify Email</a>`, // plain text body
-                    //html: output // html body
-                };
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        return console.log(error);
-                    }
-                    console.log('Message sent: %s', info.messageId);
-                });
-            }
+            await mailgun.messages().send({
+                from: `outreach@csivit.com`,
+                to: mailTo,
+                subject: 'Email Verification',
+                html,
+                text: 'HTML not enabled'
+            });
+        }
+        await run(req.body.email).catch(e => {
+            console.log(`Error in ${req.body.email}: ${e}`);
         });
+        res.end()
     }
     catch (e) {
         console.log(e);
@@ -66,17 +53,19 @@ router.get('/confirmation/:token', async (req, res) => {
         console.log(req.params.token);
         const data = jwt.verify(req.params.token, process.env.JWTSECRET);
         console.log(data);
-        let { title, email, desc, date, time, img, url } = data;
+        let { title, email, desc, start_date, start_time, end_date, end_time, img, url } = data;
         const resp = await Events.create({
             title,
             email,
             desc,
-            date,
-            time,
+            start_date,
+            start_time,
+            end_date,
+            end_time,
             img,
             url
         })
-        res.redirect("/?msg=Success")
+        res.redirect("/success")
     } catch (e) {
         res.send('error');
         console.log(e);

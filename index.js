@@ -5,6 +5,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const calendarRouter = require('./routers/calendarRouter')
+const adminRouter = require('./routers/adminRouter')
 
 const PORT = process.env.PORT || 3001
 
@@ -18,6 +19,7 @@ app.use(bodyParser.json())
 
 
 app.use('/api', calendarRouter);
+app.use('/admin', adminRouter);
 
 app.listen(PORT, () => {
     console.log(`listening on port ${PORT}`);
