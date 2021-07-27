@@ -6,9 +6,19 @@ const router = express.Router();
 const Events = require('../models/events');
 const Approved = require('../models/approved');
 
-router.get("/calendar", async (req, res) => {
+router.get('/calendar', async (req, res) => {
     try {
         const events = await Approved.find({});
+        res.json(events);
+    } catch (e) {
+        res.status(500).json({ msg: 'Error: ' + e });
+    }
+});
+
+router.get('/date', async (req, res) => {
+    try {
+        const date = req.body.date;
+        const events = await Approved.find({ start : date });
         res.json(events);
     } catch (e) {
         res.status(500).json({ msg: 'Error: ' + e });
