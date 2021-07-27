@@ -18,7 +18,7 @@ router.get('/calendar', async (req, res) => {
 router.get('/date', async (req, res) => {
     try {
         const date = req.body.date;
-        const events = await Approved.find({ start : date });
+        const events = await Approved.find($and [{ start : {$gte : date} }, {end : {$lte : date} }]);
         res.json(events);
     } catch (e) {
         res.status(500).json({ msg: 'Error: ' + e });
