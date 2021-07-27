@@ -6,7 +6,7 @@ const router = express.Router();
 const Events = require('../models/events');
 const Approved = require('../models/approved');
 
-const mailgun = new Mailgun({ apiKey: process.env.MAILAPI , domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
+const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
 router.get("/events", async (req, res) => {
     try {
@@ -17,25 +17,40 @@ router.get("/events", async (req, res) => {
     }
 });
 
-router.post('/approve/:id', async (req, res) => {
+router.get('/approve/:id', async (req, res) => {
     try {
         const event = await Events.findOne({ _id: req.params.id })
-        const template = `Your application for the event (${event.title}) was approved.<br>`;
-        const html = await inlineCSS(template, { url: 'fake' });
+        const data = {
+            title: event.title,
+            email: event.email,
+            desc: event.desc,
+            start: event.start,
+            start_time: event.start_time,
+            end: event.end,
+            end_time: event.end_time,
+            img: event.img,
+            url: event.url,
+            org: event.org
+          }
+        async function run(mailTo) {
+            const template = `Your application for the event (${event.title}) was approved.<br>`;
+            const html = await inlineCSS(template, { url: 'fake' });
 
-        await mailgun.messages().send({
-            from: `outreach@csivit.com`,
-            to: mailTo,
-            subject: 'Event Application Approved',
-            html,
-            text: 'HTML not enabled'
-        });
+            await mailgun.messages().send({
+                from: `outreach@csivit.com`,
+                to: mailTo,
+                subject: 'Email Verification',
+                html,
+                text: 'HTML not enabled'
+            });
+        }
 
         await run(event.email).catch(e => {
             console.log(`Error in ${event.email}: ${e}`);
         });
-        
-        Approved.create(event);
+
+        await Approved.create(data);
+        await Events.deleteOne({ _id: req.params.id })
         res.redirect("/admin")
     } catch (e) {
         res.send('error');
@@ -43,26 +58,29 @@ router.post('/approve/:id', async (req, res) => {
     }
 });
 
-router.get('/deny/:id', async (req, res) => {
+router.get('/deny/:id/:reason', async (req, res) => {
     try {
         const event = await Events.findOne({ _id: req.params.id })
-        let { reason } = req.body;
-        const template = `Your application for the event (${event.title}) was denied.<br>
-        Reason: ${reason}`;
-        const html = await inlineCSS(template, { url: 'fake' });
+        console.log(req.params.reason)
 
-        await mailgun.messages().send({
-            from: `outreach@csivit.com`,
-            to: mailTo,
-            subject: 'Event Application Denied',
-            html,
-            text: 'HTML not enabled'
-        });
+        async function run(mailTo) {
+            const template = `Your application for the event (${event.title}) was denied.<br>
+        Reason: ${req.params.reason}`;
+            const html = await inlineCSS(template, { url: 'fake' });
+
+            await mailgun.messages().send({
+                from: `outreach@csivit.com`,
+                to: mailTo,
+                subject: 'Email Verification',
+                html,
+                text: 'HTML not enabled'
+            });
+        }
 
         await run(event.email).catch(e => {
             console.log(`Error in ${event.email}: ${e}`);
         });
-        const resp = await Events.remove({ _id: id })
+        const resp = await Events.deleteOne({ _id: req.params.id })
         res.redirect("/admin")
     } catch (e) {
         res.send('error');

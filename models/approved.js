@@ -14,7 +14,7 @@ const ApprovedSchema = new Schema({
     	type: String,
         required: [true, 'Description is required']
     },
-    start_date: {
+    start: {
         type: Date,
         required: [true, 'Date is required']
     },
@@ -22,7 +22,7 @@ const ApprovedSchema = new Schema({
         type: String,
         required: [true, 'Time is required']
     },
-    end_date: {
+    end: {
         type: Date,
         required: [true, 'Date is required']
     },
@@ -44,5 +44,5 @@ const ApprovedSchema = new Schema({
     }
     });
 
-const Approved = mongoose.model('approved_event', ApprovedSchema);
+const Approved = mongoose.model('Approved', ApprovedSchema);
 module.exports = Approved;

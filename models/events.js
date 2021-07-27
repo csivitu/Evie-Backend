@@ -14,7 +14,7 @@ const EventSchema = new Schema({
     	type: String,
         required: [true, 'Description is required']
     },
-    start_date: {
+    start: {
         type: Date,
         required: [true, 'Date is required']
     },
@@ -22,7 +22,7 @@ const EventSchema = new Schema({
         type: String,
         required: [true, 'Time is required']
     },
-    end_date: {
+    end: {
         type: Date,
         required: [true, 'Date is required']
     },
@@ -40,7 +40,7 @@ const EventSchema = new Schema({
     },
     org: {
         type: String,
-        required: [true, 'URL is required']
+        required: [true, 'Organisation is required']
     }
     });
 
