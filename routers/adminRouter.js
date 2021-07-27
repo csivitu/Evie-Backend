@@ -25,9 +25,7 @@ router.get('/approve/:id', async (req, res) => {
             email: event.email,
             desc: event.desc,
             start: event.start,
-            start_time: event.start_time,
             end: event.end,
-            end_time: event.end_time,
             img: event.img,
             url: event.url,
             org: event.org

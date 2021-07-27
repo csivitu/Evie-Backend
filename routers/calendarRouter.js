@@ -53,15 +53,13 @@ router.get('/confirmation/:token', async (req, res) => {
         console.log(req.params.token);
         const data = jwt.verify(req.params.token, process.env.JWTSECRET);
         console.log(data);
-        let { title, email, desc, start, start_time, end, end_time, img, url, org } = data;
+        let { title, email, desc, start, end, img, url, org } = data;
         const resp = await Events.create({
             title,
             email,
             desc,
             start,
-            start_time,
             end,
-            end_time,
             img,
             url,
             org
