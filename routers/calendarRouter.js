@@ -15,10 +15,21 @@ router.get('/calendar', async (req, res) => {
     }
 });
 
-router.get('/date', async (req, res) => {
+router.post('/date', async (req, res) => {
     try {
         const date = req.body.date;
-        const events = await Approved.find($and [{ start : {$gte : date} }, {end : {$lte : date} }]);
+        const events = await Approved.find({ $and: [{ start: { $lte: date } }, { end: { $gte: date } }] });
+        res.json(events);
+    } catch (e) {
+        res.status(500).json({ msg: 'Error: ' + e });
+    }
+});
+
+router.post('/month', async (req, res) => {
+    try {
+        const begin = new Date(req.body.begin);
+        const end = new Date(req.body.end);
+        const events = await Approved.find({start : {$gte: begin, $lte: end}});
         res.json(events);
     } catch (e) {
         res.status(500).json({ msg: 'Error: ' + e });
@@ -28,10 +39,10 @@ router.get('/date', async (req, res) => {
 router.post('/add', async (req, res) => {
     console.log(req.body);
     try {
-        const mailgun = new Mailgun({ apiKey: process.env.MAILAPI , domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
+        const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
         const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
-        if(!token){
-            res.status(501).json({msg: 'Invalid Token'});
+        if (!token) {
+            res.status(501).json({ msg: 'Invalid Token' });
             return;
         }
         async function run(mailTo) {
