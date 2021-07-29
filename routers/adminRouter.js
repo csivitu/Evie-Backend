@@ -10,19 +10,22 @@ const Admin = require('../models/admin');
 const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
 router.post("/login", async (req, res) => {
-    console.log(req.body);
-    const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
-    if (!token) {
-        res.status(501).json({ msg: 'Invalid Token' });
-        return;
+    const usr = await Admin.findOne({ $and: [{ uname: req.body.uname }, { password: req.body.password }] });
+    if (usr) {
+        const token = jwt.sign({uname : usr.uname}, process.env.JWTSECRET, { expiresIn: '1d' });
+        if (!token) {
+            res.status(501).json({ msg: 'Invalid Token' });
+            return;
+        }
+        res.send(token);
+    }else{
+        res.json({ msg: "User Not Found or Invalid Credentials"})
     }
-    res.send(token);
 });
 
-router.get("/events", verifyToken,async (req, res) => {
+router.get("/events", verifyToken, async (req, res) => {
     const data = jwt.verify(req.token, process.env.JWTSECRET);
-    const usr = await Admin.findOne({ $and: [{ uname: data.uname }, { password: data.password }] });
-    if (usr) {
+    if (data) {
         try {
             const events = await Events.find({});
             res.json(events);
@@ -79,8 +82,6 @@ router.get('/approve/:id', async (req, res) => {
 router.get('/deny/:id/:reason', async (req, res) => {
     try {
         const event = await Events.findOne({ _id: req.params.id })
-        console.log(req.params.reason)
-
         async function run(mailTo) {
             const template = `Your application for the event (${event.title}) was denied.<br>
         Reason: ${req.params.reason}`;
