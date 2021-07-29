@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
     res.send(token);
 });
 
-router.get("/events", verifyToken, async (req, res) => {
+router.get("/events", verifyToken,async (req, res) => {
     const data = jwt.verify(req.token, process.env.JWTSECRET);
     const usr = await Admin.findOne({ $and: [{ uname: data.uname }, { password: data.password }] });
     if (usr) {
@@ -66,7 +66,7 @@ router.get('/approve/:id', async (req, res) => {
 
         await Approved.create(data);
         await Events.deleteOne({ _id: req.params.id })
-        res.redirect("/admin")
+        res.redirect("http://localhost:3000/admin")
     } catch (e) {
         res.send('error');
         console.log(e);
@@ -96,7 +96,7 @@ router.get('/deny/:id/:reason', async (req, res) => {
             console.log(`Error in ${event.email}: ${e}`);
         });
         const resp = await Events.deleteOne({ _id: req.params.id })
-        res.redirect("/admin")
+        res.redirect("http://localhost:3000/admin")
     } catch (e) {
         res.send('error');
         console.log(e);
