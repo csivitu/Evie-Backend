@@ -17,7 +17,7 @@ router.get('/calendar', async (req, res) => {
 
 router.post('/date', async (req, res) => {
     try {
-        const date = req.body.date;
+        const date = new Date(req.body.date);
         const events = await Approved.find({ $and: [{ start: { $lte: date } }, { end: { $gte: date } }] });
         res.json(events);
     } catch (e) {
@@ -61,7 +61,7 @@ router.post('/add', async (req, res) => {
         await run(req.body.email).catch(e => {
             console.log(`Error in ${req.body.email}: ${e}`);
         });
-        res.end()
+        res.redirect("http://localhost:3000/verify")
     }
     catch (e) {
         console.log(e);
@@ -85,7 +85,7 @@ router.get('/confirmation/:token', async (req, res) => {
             url,
             org
         })
-        res.redirect("/success")
+        res.redirect("http://localhost:3000/thankyou")
     } catch (e) {
         res.send('error');
         console.log(e);
