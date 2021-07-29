@@ -18,7 +18,8 @@ router.get('/calendar', async (req, res) => {
 router.post('/date', async (req, res) => {
     try {
         const date = new Date(req.body.date);
-        const events = await Approved.find({ $and: [{ start: { $lte: date } }, { end: { $gte: date } }] });
+        console.log(date)
+        const events = await Approved.find({ $and: [{ start: { $lte: date.setHours(23, 59, 59, 999) } }, { end: { $gte: date.setHours(0, 0, 0, 0) } }] });
         res.json(events);
     } catch (e) {
         res.status(500).json({ msg: 'Error: ' + e });

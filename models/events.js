@@ -16,11 +16,11 @@ const EventSchema = new Schema({
     },
     start: {
         type: Date,
-        required: [true, 'Date is required']
+        required: [true, 'Start Date is required']
     },
     end: {
         type: Date,
-        required: [true, 'Date is required']
+        required: [true, 'End Date is required']
     },
     img: {
         type: String,
