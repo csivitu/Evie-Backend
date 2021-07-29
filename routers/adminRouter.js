@@ -45,7 +45,10 @@ router.get('/approve/:id', async (req, res) => {
             end: event.end,
             img: event.img,
             url: event.url,
-            org: event.org
+            org: event.org,
+            backgroundColor: event.backgroundColor,
+            borderColor: event.backgroundColor,
+            textColor: event.textColor
         }
         async function run(mailTo) {
             const template = `Your application for the event (${event.title}) was approved.<br>`;
