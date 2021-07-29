@@ -18,7 +18,6 @@ router.get('/calendar', async (req, res) => {
 router.post('/date', async (req, res) => {
     try {
         const date = new Date(req.body.date);
-        console.log(date)
         const events = await Approved.find({ $and: [{ start: { $lte: date.setHours(23, 59, 59, 999) } }, { end: { $gte: date.setHours(0, 0, 0, 0) } }] });
         res.json(events);
     } catch (e) {
@@ -38,7 +37,6 @@ router.post('/month', async (req, res) => {
 });
 
 router.post('/add', async (req, res) => {
-    console.log(req.body);
     try {
         const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
         const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
@@ -72,9 +70,7 @@ router.post('/add', async (req, res) => {
 
 router.get('/confirmation/:token', async (req, res) => {
     try {
-        console.log(req.params.token);
         const data = jwt.verify(req.params.token, process.env.JWTSECRET);
-        console.log(data);
         let { title, email, desc, start, end, img, url, org, backgroundColor, textColor } = data;
         const borderColor = backgroundColor;
         const resp = await Events.create({
