@@ -74,7 +74,8 @@ router.get('/confirmation/:token', async (req, res) => {
         console.log(req.params.token);
         const data = jwt.verify(req.params.token, process.env.JWTSECRET);
         console.log(data);
-        let { title, email, desc, start, end, img, url, org } = data;
+        let { title, email, desc, start, end, img, url, org, backgroundColor, textColor } = data;
+        const borderColor = backgroundColor;
         const resp = await Events.create({
             title,
             email,
@@ -83,7 +84,10 @@ router.get('/confirmation/:token', async (req, res) => {
             end,
             img,
             url,
-            org
+            org,
+            backgroundColor,
+            borderColor,
+            textColor
         })
         res.redirect("http://localhost:3000/thankyou")
     } catch (e) {

@@ -33,6 +33,18 @@ const EventSchema = new Schema({
     org: {
         type: String,
         required: [true, 'Organisation is required']
+    },
+    backgroundColor: {
+        type: String,
+        required: [true, 'Label Color is required']
+    },
+    borderColor: {
+        type: String,
+        required: [true, 'Border Color is required']
+    },
+    textColor: {
+        type: String,
+        required: [true, 'Text Color is required']
     }
     });
 
