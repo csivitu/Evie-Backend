@@ -107,6 +107,16 @@ router.get('/deny/:id/:reason', async (req, res) => {
     }
 });
 
+router.get('/remove/:id/', async (req, res) => {
+    try { 
+        await Approved.deleteOne({ _id: req.params.id })
+        res.redirect("http://localhost:3000/admin")
+    } catch (e) {
+        res.send('error');
+        console.log(e);
+    }
+});
+
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers['authorization'];
     if (typeof bearerHeader !== 'undefined') {
