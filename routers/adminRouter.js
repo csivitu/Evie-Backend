@@ -8,6 +8,9 @@ const Events = require('../models/events');
 const Approved = require('../models/approved');
 const Admin = require('../models/admin');
 
+const approved = require('../templates/email_approved');
+const denied = require('../templates/email_denied');
+
 const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
 router.post('/login', async (req, res) => {
@@ -71,7 +74,7 @@ router.get('/approve/:id', async (req, res) => {
       textColor: event.textColor,
     };
     const run = async (mailTo) => {
-      const template = `Your application for the event (${event.title}) was approved.<br>`;
+      const template = approved(event.title);
       const html = await inlineCSS(template, { url: 'fake' });
 
       await mailgun.messages().send({
@@ -100,8 +103,7 @@ router.get('/deny/:id/:reason', async (req, res) => {
   try {
     const event = await Events.findOne({ _id: req.params.id });
     const run = async (mailTo) => {
-      const template = `Your application for the event (${event.title}) was denied.<br>
-        Reason: ${req.params.reason}`;
+      const template = denied(event.title, req.params.reason);
       const html = await inlineCSS(template, { url: 'fake' });
 
       await mailgun.messages().send({

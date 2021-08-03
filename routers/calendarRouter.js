@@ -7,6 +7,8 @@ const router = express.Router();
 const Events = require('../models/events');
 const Approved = require('../models/approved');
 
+const verify = require('../templates/email_verify');
+
 router.get('/calendar', async (req, res) => {
   try {
     const events = await Approved.find({});
@@ -50,8 +52,7 @@ router.post('/add', async (req, res) => {
       return;
     }
     const run = async (mailTo) => {
-      const template = `Follow this link to confirm your email <br>
-            <a href="${process.env.BACKEND_BASEURL}/api/confirmation/${token}">Click here to Verify Email</a>`;
+      const template = verify(token);
       const html = await inlineCSS(template, { url: 'fake' });
 
       await mailgun.messages().send({
