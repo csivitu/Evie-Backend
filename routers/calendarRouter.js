@@ -8,6 +8,7 @@ const Events = require('../models/events');
 const Approved = require('../models/approved');
 
 const verify = require('../templates/email_verify');
+const { logger } = require('../logs/logger');
 
 router.get('/calendar', async (req, res) => {
   try {
@@ -15,6 +16,7 @@ router.get('/calendar', async (req, res) => {
     res.json(events);
   } catch (e) {
     res.status(500).json({ msg: `Error: ${e}` });
+    logger.error('Could not fetch data from /calendar');
   }
 });
 
@@ -29,6 +31,7 @@ router.post('/date', async (req, res) => {
     res.json(events);
   } catch (e) {
     res.status(500).json({ msg: `Error: ${e}` });
+    logger.error('Could not fetch data from /date');
   }
 });
 
@@ -40,6 +43,7 @@ router.post('/month', async (req, res) => {
     res.json(events);
   } catch (e) {
     res.status(500).json({ msg: `Error: ${e}` });
+    logger.error('Could not fetch data from /month');
   }
 });
 
@@ -49,6 +53,7 @@ router.post('/add', async (req, res) => {
     const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
     if (!token) {
       res.status(501).json({ msg: 'Invalid Token' });
+      logger.error('Issue with JWT creation');
       return;
     }
     const run = async (mailTo) => {
@@ -64,11 +69,13 @@ router.post('/add', async (req, res) => {
       });
     };
     await run(req.body.email).catch((e) => {
-      console.log(`Error in ${req.body.email}: ${e}`);
+      // console.log(`Error in ${req.body.email}: ${e}`);
+      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
     });
     res.redirect(`${process.env.FRONTEND_BASEURL}/verify`);
   } catch (e) {
-    console.log(e);
+    // console.log(e);
+    logger.error(`In route /add: ${e}`);
     res.status(500).json({ msg: `Error: ${e}` });
   }
 });
@@ -93,10 +100,12 @@ router.get('/confirmation/:token', async (req, res) => {
       borderColor,
       textColor,
     });
+    logger.info(`Event Added ${title}`);
     res.redirect(`${process.env.FRONTEND_BASEURL}/thankyou`);
   } catch (e) {
     res.send('error');
-    console.log(e);
+    // console.log(e);
+    logger.error(`Couldn't add event (/confirmation): ${e}`);
   }
 });
 

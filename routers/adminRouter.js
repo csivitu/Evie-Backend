@@ -10,24 +10,31 @@ const Admin = require('../models/admin');
 
 const approved = require('../templates/email_approved');
 const denied = require('../templates/email_denied');
+const { logger } = require('../logs/logger');
 
 const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
 router.post('/login', async (req, res) => {
-  const usr = await Admin.findOne({
-    $and: [
-      { uname: req.body.uname },
-      { password: req.body.password }],
-  });
-  if (usr) {
-    const token = jwt.sign({ uname: usr.uname }, process.env.JWTSECRET, { expiresIn: '1d' });
-    if (!token) {
-      res.status(501).json({ msg: 'Invalid Token' });
-      return;
+  try {
+    const usr = await Admin.findOne({
+      $and: [
+        { uname: req.body.uname },
+        { password: req.body.password }],
+    });
+    if (usr) {
+      const token = jwt.sign({ uname: usr.uname }, process.env.JWTSECRET, { expiresIn: '1d' });
+      if (!token) {
+        res.status(501).json({ msg: 'Invalid Token' });
+        logger.error('Issue with JWT creation');
+        res.redirect(`${process.env.FRONTEND_BASEURL}/login`);
+      }
+      res.send(token);
+    } else {
+      res.redirect(`${process.env.FRONTEND_BASEURL}/login`);
+      logger.warn(`Unauthorized User tried to access /admin, Uname: ${req.body.uname} Pwd: ${req.body.password}`);
     }
-    res.send(token);
-  } else {
-    res.json({ msg: 'User Not Found or Invalid Credentials' });
+  } catch (e) {
+    logger.error(`Error in route (/login): ${e}`);
   }
 });
 
@@ -44,16 +51,21 @@ function verifyToken(req, res, next) {
 }
 
 router.get('/events', verifyToken, async (req, res) => {
-  const data = jwt.verify(req.token, process.env.JWTSECRET);
-  if (data) {
-    try {
-      const events = await Events.find({});
-      res.json(events);
-    } catch (e) {
-      res.status(500).json({ msg: `Error: ${e}` });
+  try {
+    const data = jwt.verify(req.token, process.env.JWTSECRET);
+    if (data) {
+      try {
+        const events = await Events.find({});
+        res.json(events);
+      } catch (e) {
+        res.status(500).json({ msg: `Error: ${e}` });
+      }
+    } else {
+      res.sendStatus(403).send('Forbidden');
+      logger.info('Attempt at acessing /events without auth');
     }
-  } else {
-    res.sendStatus(403).send('Forbidden');
+  } catch (e) {
+    logger.error('Issue in route /auth');
   }
 });
 
@@ -87,15 +99,18 @@ router.get('/approve/:id', async (req, res) => {
     };
 
     await run(event.email).catch((e) => {
-      console.log(`Error in ${event.email}: ${e}`);
+      // console.log(`Error in ${event.email}: ${e}`);
+      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
     });
 
     await Approved.create(data);
     await Events.deleteOne({ _id: req.params.id });
+    logger.info(`Event Approved ${event.title}`);
     res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
   } catch (e) {
     res.send('error');
-    console.log(e);
+    // console.log(e);
+    logger.error(`In route /approved: ${e}`);
   }
 });
 
@@ -116,13 +131,16 @@ router.get('/deny/:id/:reason', async (req, res) => {
     };
 
     await run(event.email).catch((e) => {
-      console.log(`Error in ${event.email}: ${e}`);
+      // console.log(`Error in ${event.email}: ${e}`);
+      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
     });
     await Events.deleteOne({ _id: req.params.id });
+    logger.info(`Event Denied ${event.title}`);
     res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
   } catch (e) {
     res.send('error');
-    console.log(e);
+    // console.log(e);
+    logger.error(`In route /deny: ${e}`);
   }
 });
 
@@ -130,9 +148,11 @@ router.get('/remove/:id/', async (req, res) => {
   try {
     await Approved.deleteOne({ _id: req.params.id });
     res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+    logger.info('Event Removed');
   } catch (e) {
     res.send('error');
-    console.log(e);
+    // console.log(e);
+    logger.error(`Issue approving event with id: ${req.params.id}, error: ${e}`);
   }
 });
 
