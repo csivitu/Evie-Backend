@@ -11,15 +11,17 @@ const Admin = require('../models/admin');
 const approved = require('../templates/email_approved');
 const denied = require('../templates/email_denied');
 const { logger } = require('../logs/logger');
+const { adminFormSchema } = require('../validation/adminForm');
 
 const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
 router.post('/login', async (req, res) => {
   try {
+    const result = await adminFormSchema.validateAsync(req.body);
     const usr = await Admin.findOne({
       $and: [
-        { uname: req.body.uname },
-        { password: req.body.password }],
+        { uname: result.uname },
+        { password: result.password }],
     });
     if (usr) {
       const token = jwt.sign({ uname: usr.uname }, process.env.JWTSECRET, { expiresIn: '1d' });
@@ -34,7 +36,13 @@ router.post('/login', async (req, res) => {
       logger.warn(`Unauthorized User tried to access /admin, Uname: ${req.body.uname} Pwd: ${req.body.password}`);
     }
   } catch (e) {
-    logger.error(`Error in route (/login): ${e}`);
+    if (e.isJoi === true) {
+      res.status(422).json({ msg: `${e}` });
+      logger.error(`${e}`);
+    } else {
+      logger.error(`Error in route (/login): ${e}`);
+      res.status(500).json({ msg: `Error: ${e}` });
+    }
   }
 });
 
