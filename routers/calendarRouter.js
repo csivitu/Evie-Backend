@@ -9,6 +9,7 @@ const Approved = require('../models/approved');
 
 const verify = require('../templates/email_verify');
 const { logger } = require('../logs/logger');
+const { eventFormSchema } = require('../validation/eventForm');
 
 router.get('/calendar', async (req, res) => {
   try {
@@ -50,7 +51,8 @@ router.post('/month', async (req, res) => {
 router.post('/add', async (req, res) => {
   try {
     const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
-    const token = jwt.sign(req.body, process.env.JWTSECRET, { expiresIn: '1d' });
+    const result = await eventFormSchema.validateAsync(req.body);
+    const token = jwt.sign(result, process.env.JWTSECRET, { expiresIn: '1d' });
     if (!token) {
       res.status(501).json({ msg: 'Invalid Token' });
       logger.error('Issue with JWT creation');
@@ -68,15 +70,18 @@ router.post('/add', async (req, res) => {
         text: 'HTML not enabled',
       });
     };
-    await run(req.body.email).catch((e) => {
-      // console.log(`Error in ${req.body.email}: ${e}`);
-      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
+    await run(result.email).catch((e) => {
+      logger.error(`Couldn't send mail to ${result.email}: ${e}`);
     });
     res.redirect(`${process.env.FRONTEND_BASEURL}/verify`);
   } catch (e) {
-    // console.log(e);
-    logger.error(`In route /add: ${e}`);
-    res.status(500).json({ msg: `Error: ${e}` });
+    if (e.isJoi === true) {
+      res.status(422).json({ msg: `${e}` });
+      logger.error(`${e}`);
+    } else {
+      logger.error(`In route /add: ${e}`);
+      res.status(500).json({ msg: `Error: ${e}` });
+    }
   }
 });
 
