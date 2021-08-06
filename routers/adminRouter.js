@@ -107,7 +107,6 @@ router.get('/approve/:id', async (req, res) => {
     };
 
     await run(event.email).catch((e) => {
-      // console.log(`Error in ${event.email}: ${e}`);
       logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
     });
 
@@ -117,7 +116,6 @@ router.get('/approve/:id', async (req, res) => {
     res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
   } catch (e) {
     res.send('error');
-    // console.log(e);
     logger.error(`In route /approved: ${e}`);
   }
 });
@@ -139,7 +137,6 @@ router.get('/deny/:id/:reason', async (req, res) => {
     };
 
     await run(event.email).catch((e) => {
-      // console.log(`Error in ${event.email}: ${e}`);
       logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
     });
     await Events.deleteOne({ _id: req.params.id });
@@ -147,7 +144,6 @@ router.get('/deny/:id/:reason', async (req, res) => {
     res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
   } catch (e) {
     res.send('error');
-    // console.log(e);
     logger.error(`In route /deny: ${e}`);
   }
 });
@@ -159,8 +155,7 @@ router.get('/remove/:id/', async (req, res) => {
     logger.info('Event Removed');
   } catch (e) {
     res.send('error');
-    // console.log(e);
-    logger.error(`Issue approving event with id: ${req.params.id}, error: ${e}`);
+    logger.error(`Issue removing event with id: ${req.params.id}, error: ${e}`);
   }
 });
 

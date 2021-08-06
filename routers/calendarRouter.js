@@ -109,7 +109,6 @@ router.get('/confirmation/:token', async (req, res) => {
     res.redirect(`${process.env.FRONTEND_BASEURL}/thankyou`);
   } catch (e) {
     res.send('error');
-    // console.log(e);
     logger.error(`Couldn't add event (/confirmation): ${e}`);
   }
 });
