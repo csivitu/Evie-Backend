@@ -73,7 +73,8 @@ router.post('/add', async (req, res) => {
     await run(result.email).catch((e) => {
       logger.error(`Couldn't send mail to ${result.email}: ${e}`);
     });
-    res.redirect(`${process.env.FRONTEND_BASEURL}/verify`);
+    // res.redirect(`${process.env.FRONTEND_BASEURL}/verify`);
+      res.json({code:"6969"})
   } catch (e) {
     if (e.isJoi === true) {
       res.status(422).json({ msg: `${e}` });
