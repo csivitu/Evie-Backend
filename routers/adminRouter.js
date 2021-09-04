@@ -82,6 +82,7 @@ router.get('/approve/:id', async (req, res) => {
     const event = await Events.findOne({ _id: req.params.id });
     const data = {
       title: event.title,
+      cname: event.cname,
       email: event.email,
       desc: event.desc,
       start: event.start,
