@@ -2,6 +2,7 @@ const Joi = require('joi');
 
 const eventFormSchema = Joi.object({
   title: Joi.string().min(3).max(70).required(),
+  cname: Joi.string().min(3).max(70).required(),
   email: Joi.string().email().lowercase().required(),
   desc: Joi.string().max(300).required(),
   start: Joi.date(),

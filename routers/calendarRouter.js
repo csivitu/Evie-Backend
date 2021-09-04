@@ -74,7 +74,7 @@ router.post('/add', async (req, res) => {
       logger.error(`Couldn't send mail to ${result.email}: ${e}`);
     });
     // res.redirect(`${process.env.FRONTEND_BASEURL}/verify`);
-      res.json({code:"6969"})
+    res.json({ code: '6969' });
   } catch (e) {
     if (e.isJoi === true) {
       res.status(422).json({ msg: `${e}` });
@@ -90,11 +90,12 @@ router.get('/confirmation/:token', async (req, res) => {
   try {
     const data = jwt.verify(req.params.token, process.env.JWTSECRET);
     const {
-      title, email, desc, start, end, img, url, org, backgroundColor, textColor,
+      title, cname, email, desc, start, end, img, url, org, backgroundColor, textColor,
     } = data;
     const borderColor = backgroundColor;
     await Events.create({
       title,
+      cname,
       email,
       desc,
       start,
