@@ -7,6 +7,10 @@ const ApprovedSchema = new Schema({
     type: String,
     required: [true, 'Title is required'],
   },
+  cname: {
+    type: String,
+    required: [true, 'Name of co-ordinator is required'],
+  },
   email: {
     type: String,
     required: [true, 'Email is required'],
