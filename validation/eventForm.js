@@ -8,6 +8,7 @@ const eventFormSchema = Joi.object({
   start: Joi.date(),
   end: Joi.date().min(Joi.ref('start')),
   img: Joi.string().required(),
+<<<<<<< HEAD
   url: Joi.string().required(),
   // img: Joi.string().pattern(new RegExp('https?://(www.)?([-a-zA-Z0-9@:%._+~#=]{1,256}.)+[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*).(jpg|gif|png|jpeg)$')).required(),
   //url: Joi.string().pattern(new RegExp('https?://(www.)?([-a-zA-Z0-9@:%._+~#=]{1,256}.)+[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)')).required(),
