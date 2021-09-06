@@ -12,6 +12,7 @@ const approved = require('../templates/email_approved');
 const denied = require('../templates/email_denied');
 const { logger } = require('../logs/logger');
 const { adminFormSchema } = require('../validation/adminForm');
+const { adminRouteSchema } = require('../validation/adminRoutes');
 
 const mailgun = new Mailgun({ apiKey: process.env.MAILAPI, domain: 'mail.csivit.com', host: 'api.eu.mailgun.net' });
 
@@ -81,7 +82,8 @@ router.post('/approve/:id', verifyToken, async (req, res) => {
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
-      const event = await Events.findOne({ _id: req.params.id });
+      const result = await adminRouteSchema.validateAsync(req.params);
+      const event = await Events.findOne({ _id: result.id });
       const data = {
         title: event.title,
         cname: event.cname,
@@ -108,10 +110,10 @@ router.post('/approve/:id', verifyToken, async (req, res) => {
         });
       };
       await run(event.email).catch((e) => {
-        logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
+        logger.error(`Couldn't send mail to ${event.email}: ${e}`);
       });
       await Approved.create(data);
-      await Events.deleteOne({ _id: req.params.id });
+      await Events.deleteOne({ _id: result.id });
       logger.info(`Event Approved ${event.title}`);
       res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
     } else {
@@ -128,9 +130,10 @@ router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
-      const event = await Events.findOne({ _id: req.params.id });
+      const result = await adminRouteSchema.validateAsync(req.params);
+      const event = await Events.findOne({ _id: result.id });
       const run = async (mailTo) => {
-        const template = denied(event.title, req.params.reason);
+        const template = denied(event.title, result.reason);
         const html = await inlineCSS(template, { url: 'fake' });
 
         await mailgun.messages().send({
@@ -143,9 +146,9 @@ router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
       };
 
       await run(event.email).catch((e) => {
-        logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
+        logger.error(`Couldn't send mail to ${event.email}: ${e}`);
       });
-      await Events.deleteOne({ _id: req.params.id });
+      await Events.deleteOne({ _id: result.id });
       logger.info(`Event Denied ${event.title}`);
       res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
     } else {
@@ -159,10 +162,11 @@ router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
 });
 
 router.post('/remove/:id/', verifyToken, async (req, res) => {
+  const result = await adminRouteSchema.validateAsync(req.params);
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
-      await Approved.deleteOne({ _id: req.params.id });
+      await Approved.deleteOne({ _id: result.id });
       res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
       logger.info('Event Removed');
     } else {
@@ -171,7 +175,7 @@ router.post('/remove/:id/', verifyToken, async (req, res) => {
     }
   } catch (e) {
     res.send('error');
-    logger.error(`Issue removing event with id: ${req.params.id}, error: ${e}`);
+    logger.error(`Issue removing event with id: ${result.id}, error: ${e}`);
   }
 });
 
