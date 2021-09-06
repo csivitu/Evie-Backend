@@ -77,83 +77,98 @@ router.get('/events', verifyToken, async (req, res) => {
   }
 });
 
-router.get('/approve/:id', async (req, res) => {
+router.post('/approve/:id', verifyToken, async (req, res) => {
   try {
-    const event = await Events.findOne({ _id: req.params.id });
-    const data = {
-      title: event.title,
-      cname: event.cname,
-      email: event.email,
-      desc: event.desc,
-      start: event.start,
-      end: event.end,
-      img: event.img,
-      url: event.url,
-      org: event.org,
-      backgroundColor: event.backgroundColor,
-      borderColor: event.backgroundColor,
-      textColor: event.textColor,
-    };
-    const run = async (mailTo) => {
-      const template = approved(event.title);
-      const html = await inlineCSS(template, { url: 'fake' });
-
-      await mailgun.messages().send({
-        from: 'outreach@csivit.com',
-        to: mailTo,
-        subject: 'Email Verification',
-        html,
-        text: 'HTML not enabled',
+    const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
+    if (jwtData) {
+      const event = await Events.findOne({ _id: req.params.id });
+      const data = {
+        title: event.title,
+        cname: event.cname,
+        email: event.email,
+        desc: event.desc,
+        start: event.start,
+        end: event.end,
+        img: event.img,
+        url: event.url,
+        org: event.org,
+        backgroundColor: event.backgroundColor,
+        borderColor: event.backgroundColor,
+        textColor: event.textColor,
+      };
+      const run = async (mailTo) => {
+        const template = approved(event.title);
+        const html = await inlineCSS(template, { url: 'fake' });
+        await mailgun.messages().send({
+          from: 'outreach@csivit.com',
+          to: mailTo,
+          subject: 'Email Verification',
+          html,
+          text: 'HTML not enabled',
+        });
+      };
+      await run(event.email).catch((e) => {
+        logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
       });
-    };
-
-    await run(event.email).catch((e) => {
-      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
-    });
-
-    await Approved.create(data);
-    await Events.deleteOne({ _id: req.params.id });
-    logger.info(`Event Approved ${event.title}`);
-    res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      await Approved.create(data);
+      await Events.deleteOne({ _id: req.params.id });
+      logger.info(`Event Approved ${event.title}`);
+      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+    } else {
+      res.sendStatus(403).send('Forbidden');
+      logger.info('Attempt at acessing /approve without auth');
+    }
   } catch (e) {
     res.send('error');
     logger.error(`In route /approved: ${e}`);
   }
 });
 
-router.get('/deny/:id/:reason', async (req, res) => {
+router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
   try {
-    const event = await Events.findOne({ _id: req.params.id });
-    const run = async (mailTo) => {
-      const template = denied(event.title, req.params.reason);
-      const html = await inlineCSS(template, { url: 'fake' });
+    const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
+    if (jwtData) {
+      const event = await Events.findOne({ _id: req.params.id });
+      const run = async (mailTo) => {
+        const template = denied(event.title, req.params.reason);
+        const html = await inlineCSS(template, { url: 'fake' });
 
-      await mailgun.messages().send({
-        from: 'outreach@csivit.com',
-        to: mailTo,
-        subject: 'Email Verification',
-        html,
-        text: 'HTML not enabled',
+        await mailgun.messages().send({
+          from: 'outreach@csivit.com',
+          to: mailTo,
+          subject: 'Email Verification',
+          html,
+          text: 'HTML not enabled',
+        });
+      };
+
+      await run(event.email).catch((e) => {
+        logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
       });
-    };
-
-    await run(event.email).catch((e) => {
-      logger.error(`Couldn't send mail to ${req.body.email}: ${e}`);
-    });
-    await Events.deleteOne({ _id: req.params.id });
-    logger.info(`Event Denied ${event.title}`);
-    res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      await Events.deleteOne({ _id: req.params.id });
+      logger.info(`Event Denied ${event.title}`);
+      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+    } else {
+      res.sendStatus(403).send('Forbidden');
+      logger.info('Attempt at acessing /deny without auth');
+    }
   } catch (e) {
     res.send('error');
     logger.error(`In route /deny: ${e}`);
   }
 });
 
-router.get('/remove/:id/', async (req, res) => {
+router.post('/remove/:id/', verifyToken, async (req, res) => {
   try {
-    await Approved.deleteOne({ _id: req.params.id });
-    res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
-    logger.info('Event Removed');
+    const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
+    if (jwtData) {
+      await Approved.deleteOne({ _id: req.params.id });
+      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      logger.info('Event Removed');
+    } else {
+      res.sendStatus(403).send('Forbidden');
+      logger.info('Attempt at acessing /remove without auth');
+    }
   } catch (e) {
     res.send('error');
     logger.error(`Issue removing event with id: ${req.params.id}, error: ${e}`);
