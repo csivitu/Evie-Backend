@@ -1,4 +1,4 @@
-const verify = (token) => `
+const verify = (token, eventname, cname) => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -87,6 +87,8 @@ const verify = (token) => `
             <h1 class="heading">Verify Your Email</h1>
             <p class="text">Almost There!</p>
             <p class="text">You need to verify your email by clicking the button below.</p>
+            <p class="text">Event Name: ${eventname}</p>
+            <p class="text">Co-ordinator Name: ${cname}</p>
             <a href="${process.env.BACKEND_BASEURL}/api/confirmation/${token}" class="button">Verify Email</a>
         </div>
     </div>
