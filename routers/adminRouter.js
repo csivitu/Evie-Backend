@@ -29,12 +29,13 @@ router.post('/login', async (req, res) => {
       if (!token) {
         res.status(501).json({ msg: 'Invalid Token' });
         logger.error('Issue with JWT creation');
-        res.redirect(`${process.env.FRONTEND_BASEURL}/login`);
+        return;
       }
       res.send(token);
     } else {
-      res.redirect(`${process.env.FRONTEND_BASEURL}/login`);
+      res.status(403).json({ msg: 'Forbidden' });
       logger.warn(`Unauthorized User tried to access /admin, Uname: ${req.body.uname} Pwd: ${req.body.password}`);
+      return;
     }
   } catch (e) {
     if (e.isJoi === true) {
@@ -115,13 +116,13 @@ router.post('/approve/:id', verifyToken, async (req, res) => {
       await Approved.create(data);
       await Events.deleteOne({ _id: result.id });
       logger.info(`Event Approved ${event.title}`);
-      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      res.status(200).json({ msg: 'Event Approved Successfully' });
     } else {
       res.sendStatus(403).send('Forbidden');
       logger.info('Attempt at acessing /approve without auth');
     }
   } catch (e) {
-    res.send('error');
+    res.json({ msg: 'error' });
     logger.error(`In route /approved: ${e}`);
   }
 });
@@ -150,13 +151,13 @@ router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
       });
       await Events.deleteOne({ _id: result.id });
       logger.info(`Event Denied ${event.title}`);
-      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      res.status(200).json({ msg: 'Event has been Denied' });
     } else {
       res.sendStatus(403).send('Forbidden');
       logger.info('Attempt at acessing /deny without auth');
     }
   } catch (e) {
-    res.send('error');
+    res.json({ msg: 'error' });
     logger.error(`In route /deny: ${e}`);
   }
 });
@@ -167,14 +168,14 @@ router.post('/remove/:id/', verifyToken, async (req, res) => {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
       await Approved.deleteOne({ _id: result.id });
-      res.redirect(`${process.env.FRONTEND_BASEURL}/admin`);
+      res.status(200).json({ msg: 'Event removed' });
       logger.info('Event Removed');
     } else {
       res.sendStatus(403).send('Forbidden');
       logger.info('Attempt at acessing /remove without auth');
     }
   } catch (e) {
-    res.send('error');
+    res.json({ msg: 'error' });
     logger.error(`Issue removing event with id: ${result.id}, error: ${e}`);
   }
 });
