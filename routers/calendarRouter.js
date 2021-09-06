@@ -73,7 +73,7 @@ router.post('/add', async (req, res) => {
     await run(result.email).catch((e) => {
       logger.error(`Couldn't send mail to ${result.email}: ${e}`);
     });
-    res.status(200).json({ msg: 'Verification email sent' });
+    res.json({ code: 1, msg: 'Verification email sent' });
   } catch (e) {
     if (e.isJoi === true) {
       res.status(422).json({ msg: `${e}` });
