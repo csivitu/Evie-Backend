@@ -27,13 +27,13 @@ router.post('/login', async (req, res) => {
     if (usr) {
       const token = jwt.sign({ uname: usr.uname }, process.env.JWTSECRET, { expiresIn: '1d' });
       if (!token) {
-        res.status(501).json({ msg: 'Invalid Token' });
+        res.json({ code: 0, msg: 'Invalid Token' });
         logger.error('Issue with JWT creation');
         return;
       }
       res.send(token);
     } else {
-      res.status(403).json({ msg: 'Forbidden' });
+      res.json({ code: 0, msg: 'Forbidden' });
       logger.warn(`Unauthorized User tried to access /admin, Uname: ${req.body.uname} Pwd: ${req.body.password}`);
       return;
     }
