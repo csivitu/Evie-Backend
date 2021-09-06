@@ -59,7 +59,7 @@ router.post('/add', async (req, res) => {
       return;
     }
     const run = async (mailTo) => {
-      const template = verify(token);
+      const template = verify(token, result.title, result.cname);
       const html = await inlineCSS(template, { url: 'fake' });
 
       await mailgun.messages().send({
