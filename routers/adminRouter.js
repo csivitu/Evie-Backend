@@ -79,11 +79,11 @@ router.get('/events', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/approve/:id', verifyToken, async (req, res) => {
+router.post('/approve', verifyToken, async (req, res) => {
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
-      const result = await adminRouteSchema.validateAsync(req.params);
+      const result = await adminRouteSchema.validateAsync(req.body);
       const event = await Events.findOne({ _id: result.id });
       const data = {
         title: event.title,
@@ -127,11 +127,11 @@ router.post('/approve/:id', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
+router.post('/deny', verifyToken, async (req, res) => {
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
-      const result = await adminRouteSchema.validateAsync(req.params);
+      const result = await adminRouteSchema.validateAsync(req.body);
       const event = await Events.findOne({ _id: result.id });
       const run = async (mailTo) => {
         const template = denied(event.title, result.reason);
@@ -162,8 +162,8 @@ router.post('/deny/:id/:reason', verifyToken, async (req, res) => {
   }
 });
 
-router.post('/remove/:id/', verifyToken, async (req, res) => {
-  const result = await adminRouteSchema.validateAsync(req.params);
+router.post('/remove', verifyToken, async (req, res) => {
+  const result = await adminRouteSchema.validateAsync(req.body);
   try {
     const jwtData = jwt.verify(req.token, process.env.JWTSECRET);
     if (jwtData) {
