@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 require('dotenv').config();
-require('./mongoinit');
+require('./models/mongoinit');
 
 const calendarRouter = require('./routers/calendarRouter');
 const adminRouter = require('./routers/adminRouter');

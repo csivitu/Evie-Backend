@@ -34,15 +34,19 @@
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
+- [Contributors](#contributors)
 
 
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
+<p align="center">
+<img src="https://i.imgur.com/58cJF37.png" alt="Logo" width="100">
+</p>
 
 ![Product Name Screen Shot](https://i.imgur.com/0Pl0alg.png)
 
-Backend service for Evie, a periodically updated calendar which can help clubs/chapters to let people know what they're up to, and students can keep up with events that suit their interests.
+Evie, a periodically updated calendar which can help clubs/chapters to let people know what they're up to, and students can keep up with events that suit their interests.
 
 
 ### Built With
@@ -61,6 +65,12 @@ Backend service for Evie, a periodically updated calendar which can help clubs/c
 ## Usage
 
 The students can visit [Evie](https://evie.csivit.com) and see upcoming events organised by various clubs and chapters and also visit registration wesites to register and know more about these events.
+
+A PWA (Progressive Web App) is also available, users will be prompted to install it as soon as they open the website.
+You can use this PWA to keep track of events easily! 😄🎉
+<p align="center">
+<img src="https://i.imgur.com/eY6so6Z.png" alt="Logo" width="500">
+</p>
 
 The clubs/chapters can add their events in the calendar by filling up the [Event Form](https://evie.csivit.com/addevent).
 
@@ -88,12 +98,25 @@ You are requested to follow the contribution guidelines specified in [CONTRIBUTI
 
 Distributed under the MIT License. See [`LICENSE`](./LICENSE) for more information.
 
-
-
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [csivitu-shield]: https://img.shields.io/badge/csivitu-csivitu-blue
 [csivitu-url]: https://csivit.com
 [issues-shield]: https://img.shields.io/github/issues/csivitu/Template.svg?style=flat-square
-[issues-url]: https://github.com/csivitu/Template/issues
+[issues-url]: https://github.com/csivitu/Template/issues```[![csivit][csivitu-shield]][csivitu-url]
+[![Issues][issues-shield]][issues-url]
+//github.com/csivitu/Template/issues
+
+## Contributors
+
+Thanks goes to these wonderful people:
+
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/sanjaybaskaran01"><img src="https://avatars.githubusercontent.com/u/72266283?v=4" width="100px;" alt=""/><br /><sub><b>Sanjay Baskaran</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/Mannan-Goyal"><img src="https://avatars.githubusercontent.com/u/72966340?v=4" width="100px;" alt=""/><br /><sub><b>Mannan Goyal</b></sub></a><br /></td>
+    <td align="center"><a href="https://github.com/ameeshagireesh"><img src="https://avatars.githubusercontent.com/u/67223373?v=4" width="100px;" alt=""/><br /><sub><b>Ameesha Gireesh</b></sub></a><br /></td>
+
+
+  </tr>
+</table>
