@@ -1,5 +1,5 @@
 {
-  "name": "vcal-backend",
+  "name": "evie-backend",
   "version": "1.0.0",
   "description": "A calender that shows all VIT events.",
   "main": "index.js",
