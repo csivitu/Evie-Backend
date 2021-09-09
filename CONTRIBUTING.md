@@ -8,16 +8,9 @@ The following is a set of guidelines for contributing. These are mostly guidelin
 
 ## Table of Contents
 
-- [Contributing](#contributing)
-  - [Table of Contents](#table-of-contents)
-- [Guidelines](#guidelines)
-  - [Styleguides](#styleguides)
-    - [Commit Messages](#commit-messages)
-    - [Issues](#issues)
-    - [Code Styleguide](#code-styleguide)
-    - [Pull Requests](#pull-requests)
-  - [What should I know before I get started](#what-should-i-know-before-i-get-started)
-  - [How Can I Contribute](#how-can-i-contribute)
+1. [Styleguides](#styleguides)
+2. [What should I know before I get started?](#what-should-i-know-before-i-get-started)
+3. [How Can I contribute?](#how-can-i-contribute)
 
 # Guidelines
 The following are the guidelines we request you to follow in order to contribute to this project.

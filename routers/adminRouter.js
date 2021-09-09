@@ -8,6 +8,8 @@ const Events = require('../models/events');
 const Approved = require('../models/approved');
 const Admin = require('../models/admin');
 
+const verifyToken = require('../middlewares/verifyToken');
+
 const approved = require('../templates/email_approved');
 const denied = require('../templates/email_denied');
 const { logger } = require('../logs/logger');
@@ -47,18 +49,6 @@ router.post('/login', async (req, res) => {
     }
   }
 });
-
-function verifyToken(req, res, next) {
-  const bearerHeader = req.headers.authorization;
-  if (typeof bearerHeader !== 'undefined') {
-    const bearer = bearerHeader.split(' ');
-    const bearerToken = bearer[1];
-    req.token = bearerToken;
-    next();
-  } else {
-    res.sendStatus(403);
-  }
-}
 
 router.get('/events', verifyToken, async (req, res) => {
   try {
