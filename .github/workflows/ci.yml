@@ -36,7 +36,7 @@ jobs:
         port: 22
         script: |
           cd Evie/Evie-backend/
-          git pull csi master
+          git pull
           cd ..
           docker-compose stop
           docker-compose up --build -d
