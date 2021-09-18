@@ -35,7 +35,7 @@ jobs:
         key: ${{ secrets.KEY }}
         port: 22
         script: |
-          cd Evie/Evie-backend/
+          cd Evie/Evie-Backend/
           git pull
           cd ..
           docker-compose stop
